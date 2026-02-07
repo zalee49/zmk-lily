@@ -1,8 +1,35 @@
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  firmware_build:
-    name: Build the ZMK firmware
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
-    with:
-      archive_name: zmk-firmwares
+  build:
+    runs-on: ubuntu-latest
+    name: Build ZMK Firmware
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Cache west modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            modules
+            zephyr
+            bootloader
+            zmk
+          key: ${{ runner.os }}-build-lily58-v2
+      - name: Install West
+        run: pip3 install west
+      - name: West Init
+        run: west init -l config
+      - name: West Update
+        run: west update
+      - name: West Export
+        run: west export
+      - name: Build Left
+        run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=lily58_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      - name: Build Right
+        run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=lily58_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: lily58_firmware
+          path: build/zephyr/zmk.uf2
