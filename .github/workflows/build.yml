@@ -6,9 +6,9 @@ jobs:
     name: Build ZMK Firmware
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Cache west modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             modules
@@ -29,7 +29,7 @@ jobs:
       - name: Build Right
         run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=lily58_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lily58_firmware
           path: build/zephyr/zmk.uf2
